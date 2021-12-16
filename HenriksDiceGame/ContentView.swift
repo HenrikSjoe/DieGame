@@ -16,7 +16,8 @@ struct ContentView: View {
     @State var totalSum = 0
     @State var rolls = 0
     @State var playerSums = [0, 0, 0, 0, 0, 0]
-    
+    @State var currentPlayer = 1
+    @State var turns = 1
     
     
     var body: some View {
@@ -26,16 +27,16 @@ struct ContentView: View {
                 .ignoresSafeArea()
             
             VStack{
-                Text("Player 1")
+                Text("Player \(currentPlayer)")
                     .underline()
                     .font(.title)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
-                Text("Rolls: \(rolls)")
+                Text("Current Turn: \(turns)")
                     .font(.title)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
-                Text("Total: \(totalSum)")
+                Text("Total: \(playerSums[currentPlayer-1])")
                     .font(.title)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
@@ -81,7 +82,7 @@ struct ContentView: View {
             BustSheet(turnSum: turnSum)
         }
         .sheet(isPresented: $showingWinSheet, onDismiss: { totalSum = 0; rolls = 0 }){
-            WinSheet(totalSum: totalSum, rolls: rolls)
+            WinSheet(totalSum: totalSum, turns: turns, currentPlayer: currentPlayer)
         }
     }
     
@@ -92,6 +93,12 @@ struct ContentView: View {
         
         if turnSum > 21 {
             showingBustSheet = true
+            if currentPlayer == 6 {
+                currentPlayer = 1
+            } else {
+                currentPlayer += 1
+            }
+            
             // visa ny skärm
         }
         
@@ -106,12 +113,22 @@ struct ContentView: View {
     }
     
     func stop() {
-        totalSum += turnSum
+        playerSums[currentPlayer-1] += turnSum
         turnSum = 0
+        print(playerSums)
         
-        if totalSum >= 100 {
+        
+        
+        if playerSums[currentPlayer-1] >= 100 {
             showingWinSheet = true
-            print(totalSum)
+           // print(playerSums)
+        }
+        
+        if currentPlayer == 6 {
+            currentPlayer = 1
+            turns += 1
+        } else {
+            currentPlayer += 1
         }
     }
 }
@@ -152,7 +169,8 @@ struct BustSheet : View {
 
 struct WinSheet : View {
     let totalSum : Int
-    let rolls : Int
+    let turns : Int
+    let currentPlayer : Int
     
     var body: some View {
         ZStack {
@@ -160,7 +178,7 @@ struct WinSheet : View {
                 .ignoresSafeArea()
             
             VStack{
-                Text("You won in \(rolls) rolls")
+                Text("Player \(currentPlayer) won in\(turns) turns")
                     .foregroundColor(.white)
                     .font(.title)
                 //                Text("\(totalSum)")
